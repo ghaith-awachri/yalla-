@@ -1,0 +1,474 @@
+/* Candidate Dashboard Styles */
+.candidate-dashboard {
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.candidate-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.candidate-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .candidate-grid {
+    grid-template-columns: 1fr 3fr;
+  }
+}
+
+/* Sidebar */
+.candidate-sidebar {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+}
+
+.candidate-profile {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.candidate-avatar {
+  width: 5rem;
+  height: 5rem;
+  background: #e6f2ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.candidate-name {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.candidate-role {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.candidate-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.candidate-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.candidate-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.candidate-nav-item:hover {
+  background: #f5f7fa;
+}
+
+.candidate-nav-item.active {
+  background: #e6f2ff;
+  color: #0057a0;
+  border-right: 2px solid #0057a0;
+}
+
+.candidate-subscription {
+  padding: 1rem;
+  background: linear-gradient(135deg, #e6f7ff 0%, #e6f7ff 100%);
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.candidate-subscription-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #00a6ed;
+  margin: 0 auto 0.5rem;
+}
+
+.candidate-subscription-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0088ca;
+  margin-bottom: 0.25rem;
+}
+
+.candidate-subscription-expiry {
+  font-size: 0.75rem;
+  color: #004a87;
+  margin-bottom: 0.75rem;
+}
+
+.candidate-subscription-button {
+  font-size: 0.75rem;
+  background: #00a6ed;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.candidate-subscription-button:hover {
+  background: #0088ca;
+}
+
+/* Main Content */
+.candidate-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.candidate-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .candidate-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.candidate-title {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.candidate-subtitle {
+  color: #6b7280;
+}
+
+.candidate-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-candidate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-candidate-primary {
+  background: #00a6ed;
+  color: white;
+}
+
+.btn-candidate-primary:hover {
+  background: #0088ca;
+}
+
+/* Stats Cards */
+.candidate-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .candidate-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .candidate-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.candidate-stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.candidate-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.candidate-stat-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.candidate-stat-info h3 {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.candidate-stat-info p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.candidate-stat-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #f5f7fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Job Cards */
+.candidate-jobs-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.candidate-jobs-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.candidate-jobs-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.candidate-jobs-link {
+  color: #0057a0;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.candidate-jobs-link:hover {
+  color: #004a87;
+}
+
+.candidate-jobs-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.candidate-job-item {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s ease;
+}
+
+.candidate-job-item:hover {
+  background: #f5f7fa;
+}
+
+.candidate-job-item:last-child {
+  border-bottom: none;
+}
+
+.candidate-job-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.candidate-job-info {
+  flex: 1;
+}
+
+.candidate-job-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.candidate-job-title {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.candidate-job-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.candidate-job-badge.urgent {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.candidate-job-badge.extra {
+  background: #e6f7ff;
+  color: #0088ca;
+}
+
+.candidate-job-badge.cdd {
+  background: #e6f2ff;
+  color: #004a87;
+}
+
+.candidate-job-company {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.candidate-job-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  flex-wrap: wrap;
+}
+
+.candidate-job-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.candidate-job-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-candidate-job {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-candidate-job-outline {
+  border: 1px solid #0057a0;
+  color: #0057a0;
+  background: white;
+}
+
+.btn-candidate-job-outline:hover {
+  background: #e6f2ff;
+}
+
+.btn-candidate-job-primary {
+  background: #00a6ed;
+  color: white;
+}
+
+.btn-candidate-job-primary:hover {
+  background: #0088ca;
+}
+
+/* Application Status Badges */
+.candidate-application-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.candidate-application-badge.accepted {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.candidate-application-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.candidate-application-badge.rejected {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .candidate-container {
+    padding: 1rem;
+  }
+  
+  .candidate-sidebar {
+    position: static;
+  }
+  
+  .candidate-title {
+    font-size: 1.5rem;
+  }
+  
+  .candidate-job-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .candidate-job-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .candidate-job-details {
+    font-size: 0.75rem;
+  }
+}
