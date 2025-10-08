@@ -12,7 +12,11 @@ import {
   UserPlus,
   Upload,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Calendar,
+  FileText,
+  Award,
+  Briefcase
 } from 'lucide-react';
 import './Register.css';
 
@@ -34,16 +38,25 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     address: '',
+    cin: '',
+    age: '',
+    photo: null as File | null,
+    cv: null as File | null,
     
     // Candidate specific
     experience: '',
-    education: '',
-    photo: null as File | null,
+    education: [] as string[],
+    currentPosition: '',
+    currentCompany: '',
+    desiredPositions: [] as string[],
+    preferredZones: [] as string[],
+    trainingInstitutions: [] as string[],
     
     // Employer specific
     companyName: '',
     companyType: '',
-    position: ''
+    position: '',
+    establishmentCategory: ''
   });
 
   const validateStep = (currentStep: number): boolean => {
@@ -55,10 +68,18 @@ const Register = () => {
       if (!formData.email.trim()) newErrors.email = 'L\'email est requis';
       if (!formData.phone.trim()) newErrors.phone = 'Le téléphone est requis';
       if (!formData.address.trim()) newErrors.address = 'L\'adresse est requise';
+      if (!formData.age) newErrors.age = 'L\'âge est requis';
+      
+      if (userType === 'candidate') {
+        if (!formData.cin) newErrors.cin = 'Le numéro CIN est requis';
+        if (!formData.experience) newErrors.experience = 'L\'expérience est requise';
+        if (formData.education.length === 0) newErrors.education = 'La formation est requise';
+      }
       
       if (userType === 'employer') {
         if (!formData.companyName.trim()) newErrors.companyName = 'Le nom de l\'établissement est requis';
         if (!formData.companyType) newErrors.companyType = 'La catégorie est requise';
+        if (!formData.establishmentCategory) newErrors.establishmentCategory = 'Le type d\'établissement est requis';
       }
     }
 
@@ -74,67 +95,78 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (step < 3) {
-      if (validateStep(step)) {
-        setStep(step + 1);
-      }
-      return;
+  if (step < 3) {
+    if (validateStep(step)) {
+      setStep(step + 1);
+    }
+    return;
+  }
+
+  if (!validateStep(step)) return;
+
+  setIsSubmitting(true);
+  setErrors({});
+  setSuccessMessage('');
+
+  try {
+    const formDataToSend = new FormData();
+
+    // Ajout des champs communs
+    formDataToSend.append('firstName', formData.firstName);
+    formDataToSend.append('lastName', formData.lastName);
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('phone', formData.phone);
+    formDataToSend.append('password', formData.password);
+    formDataToSend.append('confirmPassword', formData.confirmPassword);
+    formDataToSend.append('address', formData.address);
+    formDataToSend.append('userType', userType);
+    formDataToSend.append('age', formData.age);
+         
+
+    // Ajout des champs spécifiques
+    if (userType === 'candidate') {
+      formDataToSend.append('cin', formData.cin);
+      formDataToSend.append('experience', formData.experience);
+      formData.education.forEach(edu => formDataToSend.append('education', edu));
+      formDataToSend.append('currentPosition', formData.currentPosition);
+      formDataToSend.append('currentCompany', formData.currentCompany);
+      formData.desiredPositions.forEach(pos => formDataToSend.append('desiredPositions', pos));
+      formData.preferredZones.forEach(zone => formDataToSend.append('preferredZones', zone));
+      formData.trainingInstitutions.forEach(inst => formDataToSend.append('trainingInstitutions', inst));
+      if (formData.photo) formDataToSend.append('photo', formData.photo);
+      if (formData.cv) formDataToSend.append('cv', formData.cv);
+    } else {
+       if (formData.photo) formDataToSend.append('photo', formData.photo);
+      formDataToSend.append('companyName', formData.companyName);
+      formDataToSend.append('companyType', formData.companyType);
+      formDataToSend.append('establishmentCategory', formData.establishmentCategory);
+      formDataToSend.append('position', formData.position || '');
     }
 
-    if (!validateStep(step)) return;
+    const response = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      body: formDataToSend,
+    });
 
-    setIsSubmitting(true);
-    setErrors({});
+    const data = await response.json();
 
-    try {
-      const submissionData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-        address: formData.address,
-        userType: userType,
-        ...(userType === 'candidate' ? {
-          experience: formData.experience,
-          education: formData.education
-        } : {
-          companyName: formData.companyName,
-          companyType: formData.companyType,
-          position: formData.position
-        })
-      };
-
-      // URL corrigée
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submissionData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccessMessage('Inscription réussie ! Redirection vers la connexion...');
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        setErrors({ general: data.message || 'Erreur lors de l\'inscription' });
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      setErrors({ general: 'Erreur de connexion au serveur' });
-    } finally {
-      setIsSubmitting(false);
+    if (!response.ok) {
+      throw new Error(data.message || 'Erreur lors de l\'inscription');
     }
-  };
 
+    setSuccessMessage('Inscription réussie ! Redirection vers la connexion...');
+    setTimeout(() => navigate('/login'), 2000);
+
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    setErrors({ general: error.message || 'Une erreur est survenue' });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     if (e.target.type === 'file') {
       const fileInput = e.target as HTMLInputElement;
@@ -149,11 +181,163 @@ const Register = () => {
       });
     }
     
-    // Clear error when user starts typing
     if (errors[e.target.name]) {
       setErrors({ ...errors, [e.target.name]: '' });
     }
   };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, checked } = e.target;
+    let updatedArray: string[];
+    
+    if (checked) {
+      updatedArray = [...formData[name as keyof typeof formData] as string[], value];
+    } else {
+      updatedArray = (formData[name as keyof typeof formData] as string[]).filter(item => item !== value);
+    }
+    
+    setFormData({
+      ...formData,
+      [name]: updatedArray
+    });
+  };
+
+  const experienceOptions = [
+    { value: 'less_than_1', label: 'Moins d\'une année' },
+    { value: '1_to_3', label: 'Entre 1 an et 3 ans' },
+    { value: '3_to_5', label: 'Entre 3 ans et 5 ans' },
+    { value: '5_to_10', label: 'Entre 5 ans et 10 ans' },
+    { value: 'more_than_10', label: 'Plus de 10 ans' },
+    { value: 'other', label: 'Autres' }
+  ];
+
+  const educationOptions = [
+    'BAC',
+    'BTS',
+    'BTP',
+    'CAP',
+    'Maitrise',
+    'Licence',
+    'Master',
+    'Sans diplôme'
+  ];
+
+  const positionOptions = [
+    'Acheteur',
+    'Commercial',
+    'Chef de cuisine',
+    'Chef pâtissier',
+    'Chef de partie',
+    'Chef de salle',
+    'Chef de rang',
+    'Pizzaiolo',
+    'Cuisinier',
+    'Pâtissier',
+    'Croissantier',
+    'Boulanger',
+    'Comptoiriste',
+    'Barista',
+    'Barman',
+    'Maitre d\'hôtel',
+    'Glacier',
+    'Food and beverage',
+    'Caissier',
+    'Gérant',
+    'Serveur(se)',
+    'Commis',
+    'Commis de cuisine',
+    'Préparateur de Chicha',
+    'Plongeur',
+    'Responsable de restauration',
+    'Livreur',
+    'Chauffeur',
+    'Autres'
+  ];
+
+  const zoneOptions = [
+    'Banlieue nord (Marsa, Lac, kram…)',
+    'Soukra- Charguia-Aouina',
+    'Centre-ville Tunis',
+    'Menzah Nasr, Ariana',
+    'Mannouba – Bardo',
+    'Mnihla, Ettadhamen',
+    'Ben Arous',
+    'Nabeul',
+    'Hammamet',
+    'Bizerte',
+    'Sousse',
+    'Sfax',
+    'Djerba',
+    'Zaghouane',
+    'Tabarka',
+    'Monastir',
+    'Mahdi',
+    'Kairouan',
+    'Gabes',
+    'Medenine',
+    'Gafsa',
+    'Kasserine',
+    'Tozeur',
+    'Kebili',
+    'Tataouine',
+    'Sebitla',
+    'Jendouba',
+    'Beja',
+    'Kef',
+    'Sidi Bouzid',
+    'Autres'
+  ];
+
+  const trainingInstitutionOptions = [
+    'Ecole hôtelière (Kerkouane, Hammamet, Monastir Sousse, Djerba, etc)',
+    'Institut Sidi Dhrif',
+    'Centre de formation professionnelle (Ezzouhour, Tabarka, Nabeul, etc)',
+    'Institut Pascal-Tunis',
+    'Institut Maghrébin de Management et de Tourisme-Tunis',
+    'Centre de Formation Arts et Métiers – Tunis',
+    'Centre de Formation pâtisserie moderne Tunisie- Tunis',
+    'Vatel',
+    'ISET',
+    'FSEG (Tunis, Sfax, Nabeul, etc)',
+    'Ecole centrale',
+    'Centre de formation professionnelle Borj Cedria',
+    'Master Class Academy',
+    'Centre de Formation et d\'Apprentissage d\'Ezzouhour',
+    'Centre Sectoriel de Formation en Techniques Hôtelières de Tabarka',
+    'Centre Sectoriel de Formation en Techniques Hôtelières de Hammamet Sud',
+    'Centre de Formation et de Promotion du Travail Indépendant de Tozeur',
+    'Centre de Formation et d\'Apprentissage de Sidi Achour Nabeul',
+    'Centre de Formation et d\'Apprentissage de Menzel Bourguiba',
+    'Centre de Formation et de Promotion du Travail Indépendant de Hammam Sousse',
+    'Centre de Formation et d\'Apprentissage de Monastir',
+    'Centre de Formation et d\'Apprentissage de Djerba',
+    'Centre de Formation Touristique de Nabeul'
+  ];
+
+  const establishmentCategories = [
+    'Restaurant touristique',
+    'Restaurant',
+    'Café',
+    'Salon de thé',
+    'Pizzeria',
+    'Sandwicherie',
+    'Chaine de restauration',
+    'Chaine de café',
+    'Catering',
+    'Hôtel (1 étoile)',
+    'Hôtel (2 étoiles)',
+    'Hôtel (3 étoiles)',
+    'Hôtel (4 étoiles)',
+    'Hôtel (5 étoiles)',
+    'Maison d\'hôtes',
+    'Pâtisserie',
+    'Boulangerie-Pâtisserie',
+    'Boulangerie',
+    'Bar',
+    'Cafétéria',
+    'Kiosque',
+    'Autres'
+  ];
 
   const companyTypes = [
     'Restaurant',
@@ -357,6 +541,174 @@ const Register = () => {
                   {errors.address && <p className="error-message">{errors.address}</p>}
                 </div>
 
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="age" className="form-label">Âge *</label>
+                    <div className="input-with-icon">
+                      <Calendar className="input-icon" />
+                      <input
+                        type="number"
+                        id="age"
+                        name="age"
+                        required
+                        value={formData.age}
+                        onChange={handleChange}
+                        className={`form-input ${errors.age ? 'error' : ''}`}
+                        placeholder="Votre âge"
+                        min="16"
+                        max="99"
+                      />
+                    </div>
+                    {errors.age && <p className="error-message">{errors.age}</p>}
+                  </div>
+
+                  {userType === 'candidate' && (
+                    <div className="form-group">
+                      <label htmlFor="cin" className="form-label">Numéro CIN *</label>
+                      <input
+                        type="text"
+                        id="cin"
+                        name="cin"
+                        required
+                        value={formData.cin}
+                        onChange={handleChange}
+                        className={`form-input ${errors.cin ? 'error' : ''}`}
+                        placeholder="Votre numéro CIN"
+                      />
+                      {errors.cin && <p className="error-message">{errors.cin}</p>}
+                    </div>
+                  )}
+                </div>
+
+                {userType === 'candidate' && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="experience" className="form-label">Expérience professionnelle *</label>
+                      <select
+                        id="experience"
+                        name="experience"
+                        required
+                        value={formData.experience}
+                        onChange={handleChange}
+                        className={`form-select ${errors.experience ? 'error' : ''}`}
+                      >
+                        <option value="">Sélectionnez votre expérience</option>
+                        {experienceOptions.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                      {errors.experience && <p className="error-message">{errors.experience}</p>}
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Formation/diplôme *</label>
+                      <div className="checkbox-grid">
+                        {educationOptions.map(option => (
+                          <div key={option} className="checkbox-item">
+                            <input
+                              type="checkbox"
+                              id={`education-${option}`}
+                              name="education"
+                              value={option}
+                              checked={formData.education.includes(option)}
+                              onChange={handleCheckboxChange}
+                              className="form-checkbox"
+                            />
+                            <label htmlFor={`education-${option}`}>{option}</label>
+                          </div>
+                        ))}
+                      </div>
+                      {errors.education && <p className="error-message">{errors.education}</p>}
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="currentPosition" className="form-label">Poste actuel / Métier</label>
+                      <input
+                        type="text"
+                        id="currentPosition"
+                        name="currentPosition"
+                        value={formData.currentPosition}
+                        onChange={handleChange}
+                        className="form-input"
+                        placeholder="Votre poste actuel ou métier"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="currentCompany" className="form-label">Nom de l'enseigne actuelle</label>
+                      <input
+                        type="text"
+                        id="currentCompany"
+                        name="currentCompany"
+                        value={formData.currentCompany}
+                        onChange={handleChange}
+                        className="form-input"
+                        placeholder="Nom de votre établissement actuel"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Poste(s) désiré(s)</label>
+                      <div className="checkbox-grid">
+                        {positionOptions.map(option => (
+                          <div key={option} className="checkbox-item">
+                            <input
+                              type="checkbox"
+                              id={`desiredPositions-${option}`}
+                              name="desiredPositions"
+                              value={option}
+                              checked={formData.desiredPositions.includes(option)}
+                              onChange={handleCheckboxChange}
+                              className="form-checkbox"
+                            />
+                            <label htmlFor={`desiredPositions-${option}`}>{option}</label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Zone(s) de travail préférée(s)</label>
+                      <div className="checkbox-grid">
+                        {zoneOptions.map(option => (
+                          <div key={option} className="checkbox-item">
+                            <input
+                              type="checkbox"
+                              id={`preferredZones-${option}`}
+                              name="preferredZones"
+                              value={option}
+                              checked={formData.preferredZones.includes(option)}
+                              onChange={handleCheckboxChange}
+                              className="form-checkbox"
+                            />
+                            <label htmlFor={`preferredZones-${option}`}>{option}</label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Établissements de formation</label>
+                      <div className="checkbox-grid">
+                        {trainingInstitutionOptions.map(option => (
+                          <div key={option} className="checkbox-item">
+                            <input
+                              type="checkbox"
+                              id={`trainingInstitutions-${option}`}
+                              name="trainingInstitutions"
+                              value={option}
+                              checked={formData.trainingInstitutions.includes(option)}
+                              onChange={handleCheckboxChange}
+                              className="form-checkbox"
+                            />
+                            <label htmlFor={`trainingInstitutions-${option}`}>{option}</label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 {userType === 'employer' && (
                   <>
                     <div className="form-group">
@@ -394,6 +746,40 @@ const Register = () => {
                       </select>
                       {errors.companyType && <p className="error-message">{errors.companyType}</p>}
                     </div>
+
+                    <div className="form-group">
+                      <label htmlFor="establishmentCategory" className="form-label">Type d'établissement *</label>
+                      <select
+                        id="establishmentCategory"
+                        name="establishmentCategory"
+                        required
+                        value={formData.establishmentCategory}
+                        onChange={handleChange}
+                        className={`form-select ${errors.establishmentCategory ? 'error' : ''}`}
+                      >
+                        <option value="">Sélectionnez un type</option>
+                        {establishmentCategories.map(type => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                      {errors.establishmentCategory && <p className="error-message">{errors.establishmentCategory}</p>}
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="position" className="form-label">Votre poste</label>
+                      <div className="input-with-icon">
+                        <Briefcase className="input-icon" />
+                        <input
+                          type="text"
+                          id="position"
+                          name="position"
+                          value={formData.position}
+                          onChange={handleChange}
+                          className="form-input"
+                          placeholder="Ex: Gérant, Directeur, Chef..."
+                        />
+                      </div>
+                    </div>
                   </>
                 )}
               </div>
@@ -407,34 +793,8 @@ const Register = () => {
                   <p>Dernières informations pour compléter votre inscription</p>
                 </div>
 
-                {userType === 'candidate' && (
-                  <>
-                    <div className="form-group">
-                      <label htmlFor="experience" className="form-label">Expérience professionnelle</label>
-                      <textarea
-                        id="experience"
-                        name="experience"
-                        rows={3}
-                        value={formData.experience}
-                        onChange={handleChange}
-                        className="form-textarea"
-                        placeholder="Décrivez votre expérience dans le secteur HORECA..."
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="education" className="form-label">Formation</label>
-                      <input
-                        type="text"
-                        id="education"
-                        name="education"
-                        value={formData.education}
-                        onChange={handleChange}
-                        className="form-input"
-                        placeholder="Vos diplômes et formations"
-                      />
-                    </div>
-
+                
+                 
                     <div className="form-group">
                       <label htmlFor="photo" className="form-label">Photo de profil</label>
                       <div className="input-with-icon">
@@ -449,22 +809,23 @@ const Register = () => {
                         />
                       </div>
                     </div>
+{userType === 'candidate' && (
+   <>
+                    <div className="form-group">
+                      <label htmlFor="cv" className="form-label">CV (Facultatif)</label>
+                      <div className="input-with-icon">
+                        <FileText className="input-icon" />
+                        <input
+                          type="file"
+                          id="cv"
+                          name="cv"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleChange}
+                          className="form-input file-input"
+                        />
+                      </div>
+                    </div>
                   </>
-                )}
-
-                {userType === 'employer' && (
-                  <div className="form-group">
-                    <label htmlFor="position" className="form-label">Votre poste</label>
-                    <input
-                      type="text"
-                      id="position"
-                      name="position"
-                      value={formData.position}
-                      onChange={handleChange}
-                      className="form-input"
-                      placeholder="Ex: Gérant, Directeur, Chef..."
-                    />
-                  </div>
                 )}
 
                 <div className="form-grid">

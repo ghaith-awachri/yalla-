@@ -1,90 +1,258 @@
 const express = require('express');
-const Job = require('../models/Job');
+const mongoose = require('mongoose');
 const router = express.Router();
+const Job = require('../models/Job');
 
-// @route   GET /api/jobs
-// @desc    Obtenir toutes les offres d'emploi
-// @access  Public
+// Créer une nouvelle offre
+router.post('/', async (req, res) => {
+  try {
+    
+    console.log("Données reçues:", req.body);
+    
+    // Validation des champs obligatoires
+    const requiredFields = ['title', 'description', 'type', 'employer', 'owner'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Champs obligatoires manquants',
+        missingFields 
+      });
+    }
+
+    // Vérification basique du format des IDs
+    if (typeof req.body.employer !== 'string' || req.body.employer.length !== 24 ||
+        typeof req.body.owner !== 'string' || req.body.owner.length !== 24) {
+      return res.status(400).json({
+        success: false,
+        message: 'Format ID invalide'
+      });
+    }
+
+    // Conversion des types
+    const jobData = {
+      title: req.body.title,
+      description: req.body.description,
+      type: req.body.type,
+      location: {
+        address: req.body.location.address,
+        city: req.body.location.city,
+        region: req.body.location.region
+      },
+      salary: {
+        amount: Number(req.body.salary.amount),
+        period: req.body.salary.period || 'heure'
+      },
+
+      dates: {
+        start: new Date(req.body.dates.start),
+        end: req.body.dates.end ? new Date(req.body.dates.end) : null
+      },
+      employer: req.body.employer,
+      owner: req.body.owner, // Utilisation correcte de owner depuis req.body
+      status: 'pending'
+    };
+
+    const job = new Job(jobData);
+    const savedJob = await job.save();
+    
+    res.status(201).json({
+      success: true,
+      job: savedJob
+    });
+
+  } catch (err) {
+    console.error("Erreur détaillée:", err);
+    
+    if (err.name === 'ValidationError') {
+      const errors = {};
+      Object.keys(err.errors).forEach(key => {
+        errors[key] = err.errors[key].message;
+      });
+      
+      return res.status(400).json({ 
+        success: false,
+        message: 'Erreur de validation',
+        errors 
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la création de l\'offre',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+// Supprimer une offre
+router.delete('/:id', async (req, res) => {
+  try {
+    const jobId = req.params.id;
+
+    // Validation de l'ID
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de l\'offre invalide'
+      });
+    }
+
+    const deletedJob = await Job.findByIdAndDelete(jobId);
+
+    if (!deletedJob) {
+      return res.status(404).json({
+        success: false,
+        message: 'Offre non trouvée'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Offre supprimée avec succès',
+      job: deletedJob
+    });
+
+  } catch (error) {
+    console.error('Erreur:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la suppression de l\'offre',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+// Récupérer les offres
+// Récupérer les offres
+// routes/jobs.js
 router.get('/', async (req, res) => {
   try {
     const { 
       page = 1, 
       limit = 10, 
-      jobType, 
-      location, 
-      salary, 
-      search 
+      owner,
+      employer,
+      status,
+      type,
+      search,
+      minSalary,
+      maxSalary,
+      location,
+      dateFrom,
+      dateTo
     } = req.query;
     
-    const query = { status: 'active' };
+    // Créer un objet de requête avec les filtres optionnels
+    const query = {};
     
-    if (jobType) {
-      query.jobType = jobType;
-    }
+    if (owner) query.owner = owner;
+    if (employer) query.employer = employer;
+    if (status) query.status = status;
+    if (type) query.type = type;
     
-    if (location) {
-      query.location = { $regex: location, $options: 'i' };
-    }
-    
+    // Filtre de recherche texte (titre ou description)
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
-
+    
+    // Filtre salaire
+    if (minSalary || maxSalary) {
+      query['salary.amount'] = {};
+      if (minSalary) query['salary.amount'].$gte = Number(minSalary);
+      if (maxSalary) query['salary.amount'].$lte = Number(maxSalary);
+    }
+    
+    // Filtre localisation
+    if (location) {
+      query.$or = [
+        { 'location.city': { $regex: location, $options: 'i' } },
+        { 'location.region': { $regex: location, $options: 'i' } }
+      ];
+    }
+    
+    // Filtre date
+// Par ceci :
+if (dateFrom || dateTo) {
+  query['publishDate'] = {};
+  if (dateFrom) query['publishDate'].$gte = new Date(dateFrom);
+  if (dateTo) query['publishDate'].$lte = new Date(dateTo);
+}
+    
     const jobs = await Job.find(query)
-      .populate('employer', 'firstName lastName companyName')
-      .limit(limit * 1)
+      .populate('employer', 'firstName lastName companyName profilePicture')
+      .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
-      .sort({ createdAt: -1 });
+      .limit(parseInt(limit));
 
     const total = await Job.countDocuments(query);
 
-    res.json({
+    res.status(200).json({
       success: true,
       jobs,
-      pagination: {
-        current: page,
-        pages: Math.ceil(total / limit),
-        total
-      }
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit)
     });
-
   } catch (error) {
-    console.error('Erreur récupération emplois:', error);
-    res.status(500).json({
+    console.error('Erreur:', error);
+    res.status(500).json({ 
       success: false,
-      message: 'Erreur serveur',
-      error: error.message
+      message: 'Erreur lors de la récupération des offres',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
-
-// @route   POST /api/jobs
-// @desc    Créer une nouvelle offre d'emploi
-// @access  Private (Employeurs)
-router.post('/', async (req, res) => {
+// Mettre à jour le statut d'une offre
+router.patch('/:id/status', async (req, res) => {
   try {
-    const jobData = {
-      ...req.body,
-      employer: req.body.employerId // À remplacer par l'ID du token JWT
-    };
+    const jobId = req.params.id;
+    const { status } = req.body;
 
-    const job = new Job(jobData);
-    await job.save();
+    // Validation de l'ID
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de l\'offre invalide'
+      });
+    }
 
-    await job.populate('employer', 'firstName lastName companyName');
+    // Validation du statut
+    const validStatuses = ['active', 'inactive', 'pending', 'accepted', 'Refused'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Statut invalide'
+      });
+    }
 
-    res.status(201).json({
+    const updatedJob = await Job.findByIdAndUpdate(
+      jobId,
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedJob) {
+      return res.status(404).json({
+        success: false,
+        message: 'Offre non trouvée'
+      });
+    }
+
+    res.status(200).json({
       success: true,
-      message: 'Offre d\'emploi créée avec succès',
-      job
+      message: 'Statut de l\'offre mis à jour',
+      job: updatedJob
     });
 
   } catch (error) {
-    console.error('Erreur création emploi:', error);
+    console.error('Erreur:', error);
     res.status(500).json({
       success: false,
-      message: 'Erreur lors de la création de l\'offre',
-      error: error.message
+      message: 'Erreur lors de la mise à jour du statut',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

@@ -443,6 +443,30 @@
   background: #fef2f2;
   color: #dc2626;
 }
+/* CandidateDashboard.css */
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: white;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.filter-section {
+  transition: all 0.3s ease;
+}
+
+.filter-button {
+  transition: transform 0.2s ease;
+}
+
+.filter-button:hover {
+  transform: translateY(-2px);
+}
 
 /* Responsive Design */
 @media (max-width: 640px) {

@@ -14,6 +14,8 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/admin/Admindashboard';
 import CandidateDashboard from './pages/candidate/CandidateDashboard';
 import EmployerDashboard from './pages/employer/EmployerDashboard';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 
 function App() {
   return (
@@ -29,6 +31,10 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-email/:token" element={<VerifyEmail />} />
+          
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+<Route path="/forgot-password" element={<Login />} />
             
             {/* Legacy dashboard route - redirects based on user type */}
             <Route 
@@ -60,9 +66,9 @@ function App() {
               } 
             />
             
-            {/* Employer routes */}
+            {/* Employer routes avec sous-routes */}
             <Route 
-              path="/employer/dashboard" 
+              path="/employer/*" 
               element={
                 <ProtectedRoute requiredUserType="employer">
                   <EmployerDashboard />
