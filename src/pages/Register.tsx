@@ -566,7 +566,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <div className="form-group">
                       <label htmlFor="cin" className="form-label">Numéro CIN *</label>
                       <input
-                        type="text"
+                        type="number"
                         id="cin"
                         name="cin"
                         required
@@ -574,6 +574,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                         onChange={handleChange}
                         className={`form-input ${errors.cin ? 'error' : ''}`}
                         placeholder="Votre numéro CIN"
+                        min=""
+                        max="99999999"
                       />
                       {errors.cin && <p className="error-message">{errors.cin}</p>}
                     </div>
@@ -811,20 +813,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
 {userType === 'candidate' && (
    <>
-                    <div className="form-group">
-                      <label htmlFor="cv" className="form-label">CV (Facultatif)</label>
-                      <div className="input-with-icon">
-                        <FileText className="input-icon" />
-                        <input
-                          type="file"
-                          id="cv"
-                          name="cv"
-                          accept=".pdf,.doc,.docx"
-                          onChange={handleChange}
-                          className="form-input file-input"
-                        />
-                      </div>
-                    </div>
+      
                   </>
                 )}
 

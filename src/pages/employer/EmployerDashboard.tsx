@@ -267,12 +267,7 @@ const EmployerDashboard = () => {
                 {[
                   { id: '', label: 'Vue d\'ensemble', icon: FileText },
                   { id: 'jobs', label: 'Mes annonces', icon: FileText },
-                  { id: 'applications', label: 'Candidatures', icon: Users },
-                  { id: 'candidates', label: 'Rechercher candidats', icon: Search },
-                  { id: 'calendar', label: 'Planning', icon: Calendar },
-                  { id: 'favorites', label: 'Talents favoris', icon: Star },
-                  { id: 'company', label: 'Mon entreprise', icon: Building2 },
-                  { id: 'settings', label: 'Paramètres', icon: Settings }
+               
                 ].map(item => (
                   <Link
                     key={item.id}
@@ -290,16 +285,7 @@ const EmployerDashboard = () => {
                 ))}
               </nav>
 
-              <div className="mt-8 p-4 bg-gradient-to-br from-accent-50 to-accent-100 rounded-lg">
-                <div className="text-center">
-                  <Award className="w-8 h-8 text-accent-500 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-accent-900">Pack Recruteur Actif</p>
-                  <p className="text-xs text-accent-700 mt-1">Publications illimitées</p>
-                  <button className="mt-3 text-xs bg-accent-500 text-white px-3 py-1 rounded-full hover:bg-accent-600 transition-colors">
-                    Améliorer
-                  </button>
-                </div>
-              </div>
+             
             </div>
           </div>
 
