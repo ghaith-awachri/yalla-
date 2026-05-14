@@ -71,8 +71,8 @@ jobs:
           context: ./backend
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/backend:latest
-            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/yalla-extra-backend:latest
+            ghcr.io/${{ github.repository_owner }}/yalla-extra-backend:${{ github.sha }}
 
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
@@ -80,8 +80,8 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/frontend:latest
-            ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/yalla-extra-frontend:latest
+            ghcr.io/${{ github.repository_owner }}/yalla-extra-frontend:${{ github.sha }}
 
   deploy:
     name: Continuous Deployment
