@@ -32,7 +32,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredUserT
     }
 
     return <>{children}</>;
-  } catch (error) {
+  } catch {
     // Invalid user data, redirect to login
     localStorage.removeItem('token');
     localStorage.removeItem('user');

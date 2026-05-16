@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   User,
   FileText,
@@ -95,7 +95,7 @@ const [jobFilters, setJobFilters] = useState({
   dateTo: ''
 });
 
-const fetchJobs = async (page = 1) => {
+const fetchJobs = useCallback(async (page = 1) => {
   setLoadingJobs(true);
   setJobsError('');
   
@@ -137,7 +137,7 @@ const fetchJobs = async (page = 1) => {
   } finally {
     setLoadingJobs(false);
   }
-};
+}, [jobFilters, jobPagination.limit]);
 
 const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
   const { name, value } = e.target;
@@ -165,7 +165,7 @@ const resetFilters = () => {
     if (activeTab === 'jobs') {
       fetchJobs();
     }
-  }, [activeTab, jobFilters]);
+  }, [activeTab, fetchJobs]);
 
   const [stats] = useState({
     applications: 12,

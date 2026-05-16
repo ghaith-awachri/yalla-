@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { toast } from 'react-toastify';
@@ -184,7 +184,7 @@ const [jobFilters, setJobFilters] = useState({
 });
 
 // Mettre à jour la fonction fetchJobs
-const fetchJobs = async (page = 1) => {
+const fetchJobs = useCallback(async (page = 1) => {
   setLoadingJobs(true);
   setJobsError('');
   
@@ -229,7 +229,7 @@ const fetchJobs = async (page = 1) => {
   } finally {
     setLoadingJobs(false);
   }
-};
+}, [jobFilters, jobPagination.limit]);
 
 // Gestionnaire de changement de filtre
 const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -366,7 +366,7 @@ const handleJobAction = async (jobId: string, action: string) => {
     if (activeTab === 'jobs') {
       fetchJobs();
     }
-  }, [activeTab, jobFilters]);
+  }, [activeTab, fetchJobs]);
 
 
     const getPhotoUrl = (user: User) => {
@@ -426,7 +426,7 @@ type UserFilters = {
 const [userFilters, setUserFilters] = useState<UserFilters>({});
 
 // Fonction fetchUsers modifiée
-const fetchUsers = async (page = 1) => {
+const fetchUsers = useCallback(async (page = 1) => {
   setLoading(true);
   try {
     const params = new URLSearchParams({
@@ -464,7 +464,7 @@ const fetchUsers = async (page = 1) => {
   } finally {
     setLoading(false);
   }
-};
+}, [userFilters, itemsPerPage]);
 
 // Appliquer les filtres
 const applyUserFilters = () => {
@@ -551,7 +551,7 @@ const handleViewUser = (user: User) => {
     if (activeTab === 'users') {
       fetchUsers();
     }
-  }, [activeTab, currentPage, userFilters]);
+  }, [activeTab, fetchUsers]);
 
 
   const getUserTypeColor = (type: string) => {
@@ -769,7 +769,7 @@ const EditUserModal = () => {
         isActive: currentUser.isActive !== false
       });
     }
-  }, [currentUser]);
+  }, []);
 
 
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

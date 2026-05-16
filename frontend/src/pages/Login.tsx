@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, LogIn, AlertCircle, CheckCircle } from 'lucide
 import { API_URL } from '../api/config';
 import { useLanguage } from '../context/LanguageContext';
 import './Login.css';
+import { FormDropdown } from '../components/ui/FormDropdown';
 
 const Login = () => {
   const { t } = useLanguage();
@@ -40,9 +41,9 @@ const Login = () => {
       if (response.ok) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        
+
         setSuccessMessage('Connexion réussie ! Redirection...');
-        
+
         setTimeout(() => {
           switch (data.user.userType) {
             case 'admin':
@@ -69,59 +70,59 @@ const Login = () => {
     }
   };
 
-const handleForgotPassword = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setForgotPasswordStatus('');
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordStatus('');
 
-  if (!forgotPasswordEmail) {
-    setForgotPasswordStatus('Veuillez entrer votre adresse email');
-    return;
-  }
+    if (!forgotPasswordEmail) {
+      setForgotPasswordStatus('Veuillez entrer votre adresse email');
+      return;
+    }
 
-  try {
-    const response = await fetch(`${API_URL}/auth/forgot-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: forgotPasswordEmail }),
-    });
+    try {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      if (data.success) {
-        setForgotPasswordStatus('success');
-        
-        // En mode développement, afficher le lien
-        if (data.resetToken) {
-          setSuccessMessage(`Lien de réinitialisation: http://localhost:3000/reset-password/${data.resetToken}`);
+      if (response.ok) {
+        if (data.success) {
+          setForgotPasswordStatus('success');
+
+          // En mode développement, afficher le lien
+          if (data.resetToken) {
+            setSuccessMessage(`Lien de réinitialisation: http://localhost:3000/reset-password/${data.resetToken}`);
+          } else {
+            setSuccessMessage('Un email de réinitialisation a été envoyé');
+          }
         } else {
-          setSuccessMessage('Un email de réinitialisation a été envoyé');
+          setForgotPasswordStatus(data.message || 'Erreur lors de la demande');
         }
       } else {
         setForgotPasswordStatus(data.message || 'Erreur lors de la demande');
       }
-    } else {
-      setForgotPasswordStatus(data.message || 'Erreur lors de la demande');
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+
+      if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('Connection refused'))) {
+        setForgotPasswordStatus('Serveur indisponible. Veuillez vérifier que le serveur backend est démarré.');
+      } else {
+        setForgotPasswordStatus('Erreur de connexion au serveur');
+      }
     }
-  } catch (error: any) {
-    console.error('Forgot password error:', error);
-    
-    if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('Connection refused'))) {
-      setForgotPasswordStatus('Serveur indisponible. Veuillez vérifier que le serveur backend est démarré.');
-    } else {
-      setForgotPasswordStatus('Erreur de connexion au serveur');
-    }
-  }
-};
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
-    
+
     if (error) {
       setError('');
     }
@@ -137,8 +138,8 @@ const handleForgotPassword = async (e: React.FormEvent) => {
             {showForgotPassword ? t('login.forgotPassword') : t('login.title')}
           </h2>
           <p className="login-subtitle">
-            {showForgotPassword 
-              ? t('login.forgotPassword.subtitle') 
+            {showForgotPassword
+              ? t('login.forgotPassword.subtitle')
               : t('login.subtitle')
             }
           </p>
@@ -213,17 +214,15 @@ const handleForgotPassword = async (e: React.FormEvent) => {
                 <label htmlFor="userType" className="form-label">
                   {t('login.form.userType')}
                 </label>
-                <select
-                  id="userType"
-                  name="userType"
+                <FormDropdown
                   value={formData.userType}
-                  onChange={handleChange}
-                  className="form-select"
-                >
-                  <option value="candidate">{t('candidate')}</option>
-                  <option value="employer">{t('employer')}</option>
-                  <option value="admin">{t('admin')}</option>
-                </select>
+                  onValueChange={(val: string) => handleChange({ target: { name: 'userType', value: val } } as any)}
+                  options={[
+                    { value: 'candidate', label: t('candidate') },
+                    { value: 'employer', label: t('employer') },
+                    { value: 'admin', label: t('admin') }
+                  ]}
+                />
               </div>
 
               <div className="form-group">
@@ -292,10 +291,10 @@ const handleForgotPassword = async (e: React.FormEvent) => {
                 </button>
               </div>
 
-              <button
+            <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`btn-primary ${isSubmitting ? 'loading' : ''}`}
+                className={`btn-primary ${isSubmitting ? 'loading' : ''} ${formData.email && formData.password ? 'btn-active' : ''}`}
               >
                 {isSubmitting ? (
                   <>

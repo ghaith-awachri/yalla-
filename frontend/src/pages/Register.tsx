@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FormDropdown } from '../components/ui/FormDropdown';
 import { 
   User, 
   Mail, 
@@ -350,12 +351,30 @@ const handleSubmit = async (e: React.FormEvent) => {
     'Autre'
   ];
 
+    const isStepReady = () => {
+    if (step === 1) return true;
+    if (step === 2) {
+      const commonReady = formData.firstName && formData.lastName && formData.email && formData.phone && formData.address && formData.age;
+      if (userType === 'candidate') {
+        return commonReady && formData.cin && formData.experience && formData.education.length > 0;
+      }
+      return commonReady && formData.companyName && formData.companyType && formData.establishmentCategory;
+    }
+    if (step === 3) {
+      return formData.password && formData.confirmPassword && formData.password === formData.confirmPassword;
+    }
+    return false;
+  };
+
   return (
     <div className="register-container">
       <div className="register-card">
         {/* Header */}
         <div className="register-header">
-          <div className="register-logo">YALLA EXTRA</div>
+          <div className="register-logo">
+            <span className="text-blue-600">YALLA</span>
+            <span className="text-slate-900">EXTRA</span>
+          </div>
           <h2 className="register-title">Créer votre compte</h2>
           <p className="register-subtitle">Rejoignez la communauté HORECA</p>
         </div>
@@ -391,8 +410,8 @@ const handleSubmit = async (e: React.FormEvent) => {
             ))}
           </div>
           <div className="progress-labels">
-            <span className={step >= 1 ? 'active' : ''}>Type de compte</span>
-            <span className={step >= 2 ? 'active' : ''}>Informations</span>
+            <span className={step >= 1 ? 'active' : ''}>Type</span>
+            <span className={step >= 2 ? 'active' : ''}>Infos</span>
             <span className={step >= 3 ? 'active' : ''}>Finalisation</span>
           </div>
         </div>
@@ -447,430 +466,361 @@ const handleSubmit = async (e: React.FormEvent) => {
             {step === 2 && (
               <div className="step-content">
                 <div className="step-header">
-                  <h3>Vos informations personnelles</h3>
-                  <p>Renseignez vos coordonnées de base</p>
+                  <h3>Informations Personnelles</h3>
+                  <p>Renseignez vos coordonnées pour continuer</p>
                 </div>
 
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="firstName" className="form-label">Prénom *</label>
-                    <div className="input-with-icon">
-                      <User className="input-icon" />
-                      <input
-                        type="text"
-                        id="firstName"
-                        name="firstName"
-                        required
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className={`form-input ${errors.firstName ? 'error' : ''}`}
-                        placeholder="Votre prénom"
-                      />
-                    </div>
-                    {errors.firstName && <p className="error-message">{errors.firstName}</p>}
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="lastName" className="form-label">Nom *</label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      required
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className={`form-input ${errors.lastName ? 'error' : ''}`}
-                      placeholder="Votre nom"
-                    />
-                    {errors.lastName && <p className="error-message">{errors.lastName}</p>}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email" className="form-label">Adresse email *</label>
-                  <div className="input-with-icon">
-                    <Mail className="input-icon" />
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`form-input ${errors.email ? 'error' : ''}`}
-                      placeholder="votre.email@exemple.com"
-                    />
-                  </div>
-                  {errors.email && <p className="error-message">{errors.email}</p>}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="phone" className="form-label">Numéro de téléphone *</label>
-                  <div className="input-with-icon">
-                    <Phone className="input-icon" />
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      required
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className={`form-input ${errors.phone ? 'error' : ''}`}
-                      placeholder="+216 XX XXX XXX"
-                    />
-                  </div>
-                  {errors.phone && <p className="error-message">{errors.phone}</p>}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="address" className="form-label">Adresse *</label>
-                  <div className="input-with-icon">
-                    <MapPin className="input-icon" />
-                    <input
-                      type="text"
-                      id="address"
-                      name="address"
-                      required
-                      value={formData.address}
-                      onChange={handleChange}
-                      className={`form-input ${errors.address ? 'error' : ''}`}
-                      placeholder="Votre adresse complète"
-                    />
-                  </div>
-                  {errors.address && <p className="error-message">{errors.address}</p>}
-                </div>
-
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label htmlFor="age" className="form-label">Âge *</label>
-                    <div className="input-with-icon">
-                      <Calendar className="input-icon" />
-                      <input
-                        type="number"
-                        id="age"
-                        name="age"
-                        required
-                        value={formData.age}
-                        onChange={handleChange}
-                        className={`form-input ${errors.age ? 'error' : ''}`}
-                        placeholder="Votre âge"
-                        min="16"
-                        max="99"
-                      />
-                    </div>
-                    {errors.age && <p className="error-message">{errors.age}</p>}
-                  </div>
-
-                  {userType === 'candidate' && (
-                    <div className="form-group">
-                      <label htmlFor="cin" className="form-label">Numéro CIN *</label>
-                      <input
-                        type="number"
-                        id="cin"
-                        name="cin"
-                        required
-                        value={formData.cin}
-                        onChange={handleChange}
-                        className={`form-input ${errors.cin ? 'error' : ''}`}
-                        placeholder="Votre numéro CIN"
-                        min=""
-                        max="99999999"
-                      />
-                      {errors.cin && <p className="error-message">{errors.cin}</p>}
-                    </div>
-                  )}
-                </div>
-
-                {userType === 'candidate' && (
-                  <>
-                    <div className="form-group">
-                      <label htmlFor="experience" className="form-label">Expérience professionnelle *</label>
-                      <select
-                        id="experience"
-                        name="experience"
-                        required
-                        value={formData.experience}
-                        onChange={handleChange}
-                        className={`form-select ${errors.experience ? 'error' : ''}`}
-                      >
-                        <option value="">Sélectionnez votre expérience</option>
-                        {experienceOptions.map(option => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                      {errors.experience && <p className="error-message">{errors.experience}</p>}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Formation/diplôme *</label>
-                      <div className="checkbox-grid">
-                        {educationOptions.map(option => (
-                          <div key={option} className="checkbox-item">
-                            <input
-                              type="checkbox"
-                              id={`education-${option}`}
-                              name="education"
-                              value={option}
-                              checked={formData.education.includes(option)}
-                              onChange={handleCheckboxChange}
-                              className="form-checkbox"
-                            />
-                            <label htmlFor={`education-${option}`}>{option}</label>
-                          </div>
-                        ))}
-                      </div>
-                      {errors.education && <p className="error-message">{errors.education}</p>}
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="currentPosition" className="form-label">Poste actuel / Métier</label>
-                      <input
-                        type="text"
-                        id="currentPosition"
-                        name="currentPosition"
-                        value={formData.currentPosition}
-                        onChange={handleChange}
-                        className="form-input"
-                        placeholder="Votre poste actuel ou métier"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="currentCompany" className="form-label">Nom de l'enseigne actuelle</label>
-                      <input
-                        type="text"
-                        id="currentCompany"
-                        name="currentCompany"
-                        value={formData.currentCompany}
-                        onChange={handleChange}
-                        className="form-input"
-                        placeholder="Nom de votre établissement actuel"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Poste(s) désiré(s)</label>
-                      <div className="checkbox-grid">
-                        {positionOptions.map(option => (
-                          <div key={option} className="checkbox-item">
-                            <input
-                              type="checkbox"
-                              id={`desiredPositions-${option}`}
-                              name="desiredPositions"
-                              value={option}
-                              checked={formData.desiredPositions.includes(option)}
-                              onChange={handleCheckboxChange}
-                              className="form-checkbox"
-                            />
-                            <label htmlFor={`desiredPositions-${option}`}>{option}</label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Zone(s) de travail préférée(s)</label>
-                      <div className="checkbox-grid">
-                        {zoneOptions.map(option => (
-                          <div key={option} className="checkbox-item">
-                            <input
-                              type="checkbox"
-                              id={`preferredZones-${option}`}
-                              name="preferredZones"
-                              value={option}
-                              checked={formData.preferredZones.includes(option)}
-                              onChange={handleCheckboxChange}
-                              className="form-checkbox"
-                            />
-                            <label htmlFor={`preferredZones-${option}`}>{option}</label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Établissements de formation</label>
-                      <div className="checkbox-grid">
-                        {trainingInstitutionOptions.map(option => (
-                          <div key={option} className="checkbox-item">
-                            <input
-                              type="checkbox"
-                              id={`trainingInstitutions-${option}`}
-                              name="trainingInstitutions"
-                              value={option}
-                              checked={formData.trainingInstitutions.includes(option)}
-                              onChange={handleCheckboxChange}
-                              className="form-checkbox"
-                            />
-                            <label htmlFor={`trainingInstitutions-${option}`}>{option}</label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {userType === 'employer' && (
-                  <>
-                    <div className="form-group">
-                      <label htmlFor="companyName" className="form-label">Nom de l'établissement *</label>
-                      <div className="input-with-icon">
-                        <Building2 className="input-icon" />
+                <div className="form-sections-container">
+                  {/* Common Personal Info Section */}
+                  <div className="form-section-block">
+                    <h4 className="section-title">Coordonnées de base</h4>
+                    <div className="form-grid-2">
+                      <div className="form-group">
+                        <label htmlFor="firstName" className="form-label">Prénom *</label>
                         <input
                           type="text"
-                          id="companyName"
-                          name="companyName"
+                          id="firstName"
+                          name="firstName"
                           required
-                          value={formData.companyName}
+                          value={formData.firstName}
                           onChange={handleChange}
-                          className={`form-input ${errors.companyName ? 'error' : ''}`}
-                          placeholder="Nom de votre établissement"
+                          className={`form-input ${errors.firstName ? 'error' : ''}`}
+                          placeholder="Ex: Ahmed"
                         />
                       </div>
-                      {errors.companyName && <p className="error-message">{errors.companyName}</p>}
-                    </div>
 
-                    <div className="form-group">
-                      <label htmlFor="companyType" className="form-label">Catégorie d'établissement *</label>
-                      <select
-                        id="companyType"
-                        name="companyType"
-                        required
-                        value={formData.companyType}
-                        onChange={handleChange}
-                        className={`form-select ${errors.companyType ? 'error' : ''}`}
-                      >
-                        <option value="">Sélectionnez une catégorie</option>
-                        {companyTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                      {errors.companyType && <p className="error-message">{errors.companyType}</p>}
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="establishmentCategory" className="form-label">Type d'établissement *</label>
-                      <select
-                        id="establishmentCategory"
-                        name="establishmentCategory"
-                        required
-                        value={formData.establishmentCategory}
-                        onChange={handleChange}
-                        className={`form-select ${errors.establishmentCategory ? 'error' : ''}`}
-                      >
-                        <option value="">Sélectionnez un type</option>
-                        {establishmentCategories.map(type => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
-                      </select>
-                      {errors.establishmentCategory && <p className="error-message">{errors.establishmentCategory}</p>}
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="position" className="form-label">Votre poste</label>
-                      <div className="input-with-icon">
-                        <Briefcase className="input-icon" />
+                      <div className="form-group">
+                        <label htmlFor="lastName" className="form-label">Nom *</label>
                         <input
                           type="text"
-                          id="position"
+                          id="lastName"
+                          name="lastName"
+                          required
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          className={`form-input ${errors.lastName ? 'error' : ''}`}
+                          placeholder="Ex: Trabelsi"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-grid-2">
+                      <div className="form-group">
+                        <label htmlFor="email" className="form-label">Email *</label>
+                        <div className="input-with-icon">
+                          <Mail className="input-icon" />
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={`form-input ${errors.email ? 'error' : ''}`}
+                            placeholder="exemple@email.com"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="phone" className="form-label">Téléphone *</label>
+                        <div className="input-with-icon">
+                          <Phone className="input-icon" />
+                          <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            required
+                            value={formData.phone}
+                            onChange={handleChange}
+                            className={`form-input ${errors.phone ? 'error' : ''}`}
+                            placeholder="XX XXX XXX"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="address" className="form-label">Adresse *</label>
+                      <div className="input-with-icon">
+                        <MapPin className="input-icon" />
+                        <input
+                          type="text"
+                          id="address"
+                          name="address"
+                          required
+                          value={formData.address}
+                          onChange={handleChange}
+                          className={`form-input ${errors.address ? 'error' : ''}`}
+                          placeholder="Votre adresse complète"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-grid-2">
+                      <div className="form-group">
+                        <label htmlFor="age" className="form-label">Âge *</label>
+                        <input
+                          type="number"
+                          id="age"
+                          name="age"
+                          required
+                          value={formData.age}
+                          onChange={handleChange}
+                          className={`form-input ${errors.age ? 'error' : ''}`}
+                          placeholder="Ex: 25"
+                        />
+                      </div>
+
+                      {userType === 'candidate' && (
+                        <div className="form-group">
+                          <label htmlFor="cin" className="form-label">Numéro CIN *</label>
+                          <input
+                            type="number"
+                            id="cin"
+                            name="cin"
+                            required
+                            value={formData.cin}
+                            onChange={handleChange}
+                            className={`form-input ${errors.cin ? 'error' : ''}`}
+                            placeholder="8 chiffres"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Candidate Specific Experience Section */}
+                  {userType === 'candidate' && (
+                    <>
+                      <div className="form-section-block">
+                        <h4 className="section-title">Expérience & Formation</h4>
+                        <div className="form-group">
+                          <label className="form-label">Expérience professionnelle *</label>
+                          <FormDropdown 
+                            value={formData.experience}
+                            onValueChange={(val) => handleChange({ target: { name: 'experience', value: val } } as any)}
+                            placeholder="Votre niveau d'expérience"
+                            options={experienceOptions}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Diplômes / Certifications *</label>
+                          <div className="checkbox-grid-3">
+                            {educationOptions.map(option => (
+                              <div key={option} className="checkbox-item-premium">
+                                <input
+                                  type="checkbox"
+                                  id={`education-${option}`}
+                                  name="education"
+                                  value={option}
+                                  checked={formData.education.includes(option)}
+                                  onChange={handleCheckboxChange}
+                                />
+                                <label htmlFor={`education-${option}`}>{option}</label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="form-grid-2">
+                          <div className="form-group">
+                            <label className="form-label">Poste actuel</label>
+                            <input
+                              type="text"
+                              name="currentPosition"
+                              value={formData.currentPosition}
+                              onChange={handleChange}
+                              className="form-input"
+                              placeholder="Ex: Serveur"
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Établissement actuel</label>
+                            <input
+                              type="text"
+                              name="currentCompany"
+                              value={formData.currentCompany}
+                              onChange={handleChange}
+                              className="form-input"
+                              placeholder="Nom du restaurant/hôtel"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="form-section-block">
+                        <h4 className="section-title">Souhaits & Préférences</h4>
+                        <div className="form-group">
+                          <label className="form-label">Postes recherchés</label>
+                          <div className="scroll-checkbox-list">
+                            {positionOptions.map(option => (
+                              <div key={option} className="checkbox-item-premium">
+                                <input
+                                  type="checkbox"
+                                  id={`desired-${option}`}
+                                  name="desiredPositions"
+                                  value={option}
+                                  checked={formData.desiredPositions.includes(option)}
+                                  onChange={handleCheckboxChange}
+                                />
+                                <label htmlFor={`desired-${option}`}>{option}</label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Zones géographiques préférées</label>
+                          <div className="scroll-checkbox-list">
+                            {zoneOptions.map(option => (
+                              <div key={option} className="checkbox-item-premium">
+                                <input
+                                  type="checkbox"
+                                  id={`zone-${option}`}
+                                  name="preferredZones"
+                                  value={option}
+                                  checked={formData.preferredZones.includes(option)}
+                                  onChange={handleCheckboxChange}
+                                />
+                                <label htmlFor={`zone-${option}`}>{option}</label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Employer Specific Section */}
+                  {userType === 'employer' && (
+                    <div className="form-section-block">
+                      <h4 className="section-title">Détails de l'établissement</h4>
+                      <div className="form-group">
+                        <label className="form-label">Nom de l'établissement *</label>
+                        <div className="input-with-icon">
+                          <Building2 className="input-icon" />
+                          <input
+                            type="text"
+                            name="companyName"
+                            required
+                            value={formData.companyName}
+                            onChange={handleChange}
+                            className="form-input"
+                            placeholder="Nom officiel"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-grid-2">
+                        <div className="form-group">
+                          <label className="form-label">Catégorie *</label>
+                          <FormDropdown 
+                            value={formData.companyType}
+                            onValueChange={(val) => handleChange({ target: { name: 'companyType', value: val } } as any)}
+                            options={companyTypes.map(t => ({ value: t, label: t }))}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Type d'établissement *</label>
+                          <FormDropdown 
+                            value={formData.establishmentCategory}
+                            onValueChange={(val) => handleChange({ target: { name: 'establishmentCategory', value: val } } as any)}
+                            options={establishmentCategories.map(c => ({ value: c, label: c }))}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Votre poste au sein de l'établissement</label>
+                        <input
+                          type="text"
                           name="position"
                           value={formData.position}
                           onChange={handleChange}
                           className="form-input"
-                          placeholder="Ex: Gérant, Directeur, Chef..."
+                          placeholder="Ex: Gérant"
                         />
                       </div>
                     </div>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Step 3: Additional Information & Security */}
+            {/* Step 3: Security */}
             {step === 3 && (
               <div className="step-content">
                 <div className="step-header">
-                  <h3>Finalisez votre profil</h3>
-                  <p>Dernières informations pour compléter votre inscription</p>
+                  <h3>Sécurité du compte</h3>
+                  <p>Définissez vos identifiants de connexion</p>
                 </div>
 
-                
-                 
-                    <div className="form-group">
-                      <label htmlFor="photo" className="form-label">Photo de profil</label>
-                      <div className="input-with-icon">
-                        <Upload className="input-icon" />
-                        <input
-                          type="file"
-                          id="photo"
-                          name="photo"
-                          accept="image/*"
-                          onChange={handleChange}
-                          className="form-input file-input"
-                        />
-                      </div>
-                    </div>
-{userType === 'candidate' && (
-   <>
-      
-                  </>
-                )}
-
-                <div className="form-grid">
+                <div className="form-section-block">
                   <div className="form-group">
-                    <label htmlFor="password" className="form-label">Mot de passe *</label>
-                    <div className="input-with-icon">
-                      <Lock className="input-icon" />
+                    <label className="form-label">Photo de profil</label>
+                    <div className="file-upload-zone">
+                      <Upload className="w-8 h-8 text-slate-300 mb-2" />
                       <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        name="password"
-                        required
-                        value={formData.password}
+                        type="file"
+                        name="photo"
+                        accept="image/*"
                         onChange={handleChange}
-                        className={`form-input password-input ${errors.password ? 'error' : ''}`}
-                        placeholder="Mot de passe sécurisé"
+                        className="file-input-hidden"
+                        id="photo-upload"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="password-toggle"
-                      >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
+                      <label htmlFor="photo-upload" className="file-upload-label">
+                        {formData.photo ? formData.photo.name : 'Cliquez pour uploader une photo'}
+                      </label>
                     </div>
-                    {errors.password && <p className="error-message">{errors.password}</p>}
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="confirmPassword" className="form-label">Confirmer le mot de passe *</label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
-                      placeholder="Confirmez votre mot de passe"
-                    />
-                    {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
+                  <div className="form-grid-2">
+                    <div className="form-group">
+                      <label htmlFor="password" className="form-label">Mot de passe *</label>
+                      <div className="input-with-icon">
+                        <Lock className="input-icon" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          id="password"
+                          name="password"
+                          required
+                          value={formData.password}
+                          onChange={handleChange}
+                          className="form-input"
+                          placeholder="Min. 6 caractères"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="password-toggle"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="confirmPassword" className="form-label">Confirmation *</label>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        required
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className="form-input"
+                        placeholder="Répétez le mot de passe"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="terms-group">
-                  <input
-                    id="terms"
-                    name="terms"
-                    type="checkbox"
-                    required
-                    className="form-checkbox"
-                  />
+                  <input id="terms" type="checkbox" required className="form-checkbox" />
                   <label htmlFor="terms" className="terms-label">
-                    J'accepte les{' '}
-                    <a href="#" className="terms-link">conditions d'utilisation</a>{' '}
-                    et la{' '}
-                    <a href="#" className="terms-link">politique de confidentialité</a>
+                    J'accepte les <a href="#">conditions d'utilisation</a>
                   </label>
                 </div>
               </div>
@@ -892,12 +842,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`btn-primary ${step === 1 ? 'full-width' : ''} ${isSubmitting ? 'loading' : ''}`}
+                className={`btn-primary ${step === 1 ? 'full-width' : ''} ${isSubmitting ? 'loading' : ''} ${isStepReady() ? 'btn-active' : ''}`}
               >
                 {isSubmitting ? (
                   <>
                     <div className="spinner"></div>
-                    <span>Inscription...</span>
+                    <span>Chargement...</span>
                   </>
                 ) : step < 3 ? (
                   <span>Continuer</span>

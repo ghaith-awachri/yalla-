@@ -23,66 +23,62 @@ function App() {
   return (
     <LanguageProvider>
       <Router>
-        <div className="min-h-screen bg-secondary-50">
+        <div className="min-h-screen bg-secondary-50 flex flex-col">
           <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/concept" element={<Concept />} />
-            <Route path="/professionals" element={<ForProfessionals />} />
-            <Route path="/candidates" element={<ForCandidates />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/verify-email/:token" element={<VerifyEmail />} />
-          
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-<Route path="/forgot-password" element={<Login />} />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/concept" element={<Concept />} />
+              <Route path="/professionals" element={<ForProfessionals />} />
+              <Route path="/candidates" element={<ForCandidates />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify-email/:token" element={<VerifyEmail />} />
             
-            {/* Legacy dashboard route - redirects based on user type */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Admin routes */}
-            <Route 
-              path="/admin/dashboard" 
-              element={
-                <ProtectedRoute requiredUserType="admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Candidate routes */}
-            <Route 
-              path="/candidate/dashboard" 
-              element={
-                <ProtectedRoute requiredUserType="candidate">
-                  <CandidateDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Employer routes avec sous-routes */}
-            <Route 
-              path="/employer/*" 
-              element={
-                <ProtectedRoute requiredUserType="employer">
-                  <EmployerDashboard />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/forgot-password" element={<Login />} />
+              
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/admin/dashboard" 
+                element={
+                  <ProtectedRoute requiredUserType="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/candidate/dashboard" 
+                element={
+                  <ProtectedRoute requiredUserType="candidate">
+                    <CandidateDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/employer/*" 
+                element={
+                  <ProtectedRoute requiredUserType="employer">
+                    <EmployerDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
     </LanguageProvider>
   );
 }

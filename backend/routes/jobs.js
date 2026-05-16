@@ -183,7 +183,7 @@ if (dateFrom || dateTo) {
 }
     
     const jobs = await Job.find(query)
-      .populate('employer', 'firstName lastName companyName profilePicture')
+      .populate('employer', 'firstName lastName companyName photo')
       .sort({ publishDate: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));

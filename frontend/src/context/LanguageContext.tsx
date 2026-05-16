@@ -19,6 +19,7 @@ const translations: Translations = {
   "auth.login": { fr: "Connexion", ar: "تسجيل الدخول" },
   "auth.register": { fr: "S'inscrire", ar: "إنشاء حساب" },
   "auth.logout": { fr: "Se déconnecter", ar: "تسجيل الخروج" },
+  "auth.account": { fr: "Compte", ar: "حساب" },
   "profile.dashboard": { fr: "Tableau de bord", ar: "لوحة القيادة" },
   "profile.settings": { fr: "Paramètres du compte", ar: "إعدادات الحساب" },
   "profile.publicView": { fr: "Aperçu public", ar: "نظرة عامة عامة" },
